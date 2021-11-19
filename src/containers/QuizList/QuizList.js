@@ -1,27 +1,55 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import classes from './QuizList.css';
 import { NavLink } from 'react-router-dom';
+import Loader from '../../components/UI/Loader/Loader';
+import axios from '../../axios/axios-quiz';
 
-export default class QuizList extends React.Component {
-  renderQuizes() {
-    return [1, 2, 3].map((quiz, index) => {
+const QuizList = () => {
+  const [state, setState] = useState({
+    quizes: [],
+    loading: true,
+  });
+
+  function renderQuizes() {
+    return state.quizes.map((quiz) => {
       return (
-        <li key={index}>
-          <NavLink to={'/quiz/' + quiz}>Test {quiz}</NavLink>
+        <li key={quiz.id}>
+          <NavLink to={'/quiz/' + quiz.id}>{quiz.name}</NavLink>
         </li>
       );
     });
   }
 
-  render() {
-    return (
-      <div className={classes.QuizList}>
-        <div>
-          <h1>Список тестов</h1>
+  const getQuizList = useCallback(async () => {
+    try {
+      const response = await axios.get('quizes.json');
 
-          <ul>{this.renderQuizes()}</ul>
-        </div>
+      const quizes = [];
+
+      Object.keys(response.data).forEach((key, index) => {
+        quizes.push({ id: key, name: `Тест №${index + 1}` });
+      });
+
+      setState((prev) => {
+        return { ...prev, quizes, loading: false };
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }, []);
+
+  useEffect(() => {
+    getQuizList();
+  }, [getQuizList]);
+
+  return (
+    <div className={classes.QuizList}>
+      <div>
+        <h1>Список тестов</h1>
+        {state.loading ? <Loader /> : <ul>{renderQuizes()}</ul>}
       </div>
-    );
-  }
-}
+    </div>
+  );
+};
+
+export default QuizList;
