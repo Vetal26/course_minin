@@ -1,17 +1,15 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useEffect } from 'react';
 import classes from './QuizList.css';
 import { NavLink } from 'react-router-dom';
 import Loader from '../../components/UI/Loader/Loader';
-import axios from '../../axios/axios-quiz';
+import { connect } from 'react-redux';
+import { fetchQuizes } from '../../store/actions/quiz';
 
-const QuizList = () => {
-  const [state, setState] = useState({
-    quizes: [],
-    loading: true,
-  });
+const QuizList = (props) => {
+  const { fetchQuizes, quizes, loading } = props;
 
   function renderQuizes() {
-    return state.quizes.map((quiz) => {
+    return quizes.map((quiz) => {
       return (
         <li key={quiz.id}>
           <NavLink to={'/quiz/' + quiz.id}>{quiz.name}</NavLink>
@@ -20,36 +18,35 @@ const QuizList = () => {
     });
   }
 
-  const getQuizList = useCallback(async () => {
-    try {
-      const response = await axios.get('quizes.json');
-
-      const quizes = [];
-
-      Object.keys(response.data).forEach((key, index) => {
-        quizes.push({ id: key, name: `Тест №${index + 1}` });
-      });
-
-      setState((prev) => {
-        return { ...prev, quizes, loading: false };
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  }, []);
-
   useEffect(() => {
-    getQuizList();
-  }, [getQuizList]);
+    fetchQuizes();
+  }, [fetchQuizes]);
 
   return (
     <div className={classes.QuizList}>
       <div>
         <h1>Список тестов</h1>
-        {state.loading ? <Loader /> : <ul>{renderQuizes()}</ul>}
+        {loading && quizes.length !== 0 ? (
+          <Loader />
+        ) : (
+          <ul>{renderQuizes()}</ul>
+        )}
       </div>
     </div>
   );
 };
 
-export default QuizList;
+function mapStateToProps(state) {
+  return {
+    quizes: state.quiz.quizes,
+    loading: state.quiz.loading,
+  };
+}
+
+function mapDispatchToProps(dispatch) {
+  return {
+    fetchQuizes: () => dispatch(fetchQuizes()),
+  };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(QuizList);
