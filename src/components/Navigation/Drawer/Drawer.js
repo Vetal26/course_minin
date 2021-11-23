@@ -3,18 +3,12 @@ import classes from './Drawer.css';
 import { NavLink } from 'react-router-dom';
 import Backdrop from '../../UI/Backdrop/Backdrop';
 
-const links = [
-  { to: '/', label: 'Список', end: true },
-  { to: '/auth', label: 'Авторизация', end: false },
-  { to: '/quiz-creator', label: 'Создать тест', end: false },
-];
-
-class Drawer extends React.Component {
-  clickHandler = () => {
-    this.props.onClose();
+const Drawer = (props) => {
+  const clickHandler = () => {
+    props.onClose();
   };
 
-  renderLinks() {
+  function renderLinks(links) {
     return links.map((link, index) => {
       return (
         <li key={index}>
@@ -22,7 +16,7 @@ class Drawer extends React.Component {
             to={link.to}
             end={link.end}
             className={({ isActive }) => (isActive ? classes.active : '')}
-            onClick={this.clickHandler}
+            onClick={clickHandler}
           >
             {link.label}
           </NavLink>
@@ -31,22 +25,29 @@ class Drawer extends React.Component {
     });
   }
 
-  render() {
-    const cls = [classes.Drawer];
+  const cls = [classes.Drawer];
 
-    if (!this.props.isOpen) {
-      cls.push(classes.close);
-    }
-
-    return (
-      <React.Fragment>
-        <nav className={cls.join(' ')}>
-          <ul>{this.renderLinks()}</ul>
-        </nav>
-        {this.props.isOpen ? <Backdrop onClick={this.props.onClose} /> : null}
-      </React.Fragment>
-    );
+  if (!props.isOpen) {
+    cls.push(classes.close);
   }
-}
+
+  const links = [{ to: '/', label: 'Список', end: true }];
+
+  if (props.isAuthenticated) {
+    links.push({ to: '/quiz-creator', label: 'Создать тест', end: false });
+    links.push({ to: '/logout', label: 'Выйти', end: false });
+  } else {
+    links.push({ to: '/auth', label: 'Авторизация', end: false });
+  }
+
+  return (
+    <React.Fragment>
+      <nav className={cls.join(' ')}>
+        <ul>{renderLinks(links)}</ul>
+      </nav>
+      {props.isOpen ? <Backdrop onClick={props.onClose} /> : null}
+    </React.Fragment>
+  );
+};
 
 export default Drawer;

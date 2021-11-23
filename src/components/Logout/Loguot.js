@@ -1,14 +1,16 @@
 import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
-import { Redirect } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { logout } from '../../store/actions/auth';
 
 const Logout = (props) => {
-  useEffect(() => {
-    props.logout();
-  });
+  const { logout } = props;
 
-  return <Redirect to="/" />;
+  useEffect(() => {
+    logout();
+  }, [logout]);
+
+  return <Navigate replace to="/" />;
 };
 
 function mapDispatchToProps(dispatch) {

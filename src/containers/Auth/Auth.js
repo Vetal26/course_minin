@@ -5,6 +5,7 @@ import Input from '../../components/UI/Input/Input';
 import is from 'is_js';
 import { connect } from 'react-redux';
 import { auth } from '../../store/actions/auth';
+import { useNavigate } from 'react-router-dom';
 
 const Auth = (props) => {
   const { auth } = props;
@@ -38,12 +39,16 @@ const Auth = (props) => {
     },
   });
 
+  let navigate = useNavigate();
+
   const loginHandler = () => {
     auth(
       state.formControls.email.value,
       state.formControls.password.value,
       true,
     );
+
+    navigate('/');
   };
 
   const registerHandler = () => {
@@ -146,6 +151,12 @@ const Auth = (props) => {
   );
 };
 
+function mapStateToProps(state) {
+  return {
+    isAuthenticated: !!state.auth.token,
+  };
+}
+
 function mapDispatchToProps(dispatch) {
   return {
     auth: (email, password, isLogin) =>
@@ -153,4 +164,4 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-export default connect(null, mapDispatchToProps)(Auth);
+export default connect(mapStateToProps, mapDispatchToProps)(Auth);
